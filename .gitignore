@@ -1,0 +1,38 @@
+# Environnement virtuel
+venv/
+env/
+ENV/
+
+# Fichiers Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Base de données
+*.db
+*.sqlite
+*.sqlite3
+
+# Dossiers uploads et exports
+uploads/
+exports/
+temp/
+
+# Fichiers de configuration
+.env
+*.conf
+
+# IDE
+.vscode/
+.idea/
+
+# Streamlit
+.streamlit/
+
+# Images générées
+*.png
+*.jpg
+*.jpeg
+!test_*.png  # Garder les images de test
