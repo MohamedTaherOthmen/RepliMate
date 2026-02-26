@@ -1,8 +1,9 @@
 import os
+import cv2
+import numpy as np
 from PIL import Image
 import streamlit as st
 from cannyFilter import CannyFilter
-
 
 st.set_page_config(
     page_title="RepliMate",
@@ -17,6 +18,9 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
+    array_img = np.array(image)
+    cv2.imwrite("../uploads/image.jpg", array_img)
+
     st.image(image, caption="Aperçu", use_container_width=True)
     
     st.write("Informations")
