@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 venv/
 
 __pycache__/
@@ -16,3 +17,10 @@ exports/
 *.png
 *.jpg
 *.jpeg
+=======
+# folders
+
+
+
+# files
+>>>>>>> b359304bbd6ecbff6655d8f9dc6437b2a02b7880
