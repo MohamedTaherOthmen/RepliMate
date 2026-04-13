@@ -1,24 +1,23 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: "#FF6600" },
+        headerTintColor: "#fff",
+        headerTitleStyle: { fontWeight: "700" },
+        contentStyle: { backgroundColor: "#fff" },
+      }}
+    >
+      <Stack.Screen
+        name="index"
+        options={{ title: "RepliMate", headerShown: false }}
+      />
+      <Stack.Screen name="camera" options={{ title: "Scanner" }} />
+      <Stack.Screen name="history" options={{ title: "Historique" }} />
+      <Stack.Screen name="guide" options={{ title: "Guide" }} />
+      <Stack.Screen name="editor" options={{ title: "Éditeur DXF" }} />
+    </Stack>
   );
 }
