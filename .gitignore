@@ -1,26 +1,43 @@
-<<<<<<< HEAD
-venv/
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.so
+# dependencies
+node_modules/
 
-uploads/
-exports/
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-.vscode/
-.idea/
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
+# Metro
+.metro-health-check*
 
-*.png
-*.jpg
-*.jpeg
-=======
-# folders
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
+# macOS
+.DS_Store
+*.pem
 
+# local env files
+.env*.local
 
-# files
->>>>>>> b359304bbd6ecbff6655d8f9dc6437b2a02b7880
+# typescript
+*.tsbuildinfo
+
+app-example
+
+# generated native folders
+/ios
+/android
