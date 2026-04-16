@@ -76,4 +76,3 @@ for f in tmp_files:
     os.unlink(f)
 
 print("Done → calibration_board.pdf")
-print("Hayyy Hannaa nikhdmou ya louled !!!!!")
