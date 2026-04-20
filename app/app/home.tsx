@@ -1,66 +1,54 @@
-import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
   Alert,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
+import { signOut } from "firebase/auth";
+import { auth } from "./firebase";
+import { saveDetection, getDetections } from "./storage";
 
 export default function HomeScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const handleLogin = () => {
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Erreur", "Veuillez entrer email et mot de passe.");
-      return;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace("/");
+    } catch (error: any) {
+      Alert.alert("Erreur", error.message);
     }
-    setIsLoggedIn(true);
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    setEmail("");
-    setPassword("");
+  const handleTestDatabase = async () => {
+    try {
+      const saved = await saveDetection({
+        name: "Test DB",
+        scale: 0.25,
+        angle: 0,
+        points: [
+          [100, 100],
+          [200, 100],
+          [200, 200],
+          [100, 200],
+        ],
+        dxfData: "TEST_DXF_CONTENT",
+      });
+
+      const all = await getDetections();
+
+      console.log("Saved:", saved);
+      console.log("All detections:", all);
+
+      Alert.alert(
+        "Test DB réussi",
+        `Base OK : ${all.length} enregistrement(s). Vérifie maintenant l'écran Historique.`
+      );
+    } catch (error: any) {
+      Alert.alert("Erreur DB", error.message || "Test base échoué");
+    }
   };
-
-  if (!isLoggedIn) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>RepliMate</Text>
-        <Text style={styles.subtitle}>Connexion</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Mot de passe"
-          placeholderTextColor="#999"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
-          <Text style={styles.buttonText}>Se connecter</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.footer}>Orange Fab Lab</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -86,6 +74,20 @@ export default function HomeScreen() {
         onPress={() => router.push("/guide")}
       >
         <Text style={styles.buttonText}>📖 Guide</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.testDbButton]}
+        onPress={handleTestDatabase}
+      >
+        <Text style={styles.buttonText}>🧪 Tester la base</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.button, styles.passwordButton]}
+        onPress={() => router.push("/change-password")}
+      >
+        <Text style={styles.buttonText}>🔒 Modifier mot de passe</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -120,16 +122,6 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: "center",
   },
-  input: {
-    width: "100%",
-    height: 50,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    fontSize: 16,
-  },
   button: {
     backgroundColor: "#FF6600",
     paddingHorizontal: 40,
@@ -139,20 +131,26 @@ const styles = StyleSheet.create({
     width: "80%",
     alignItems: "center",
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
   historyButton: {
     backgroundColor: "#2196F3",
   },
   guideButton: {
     backgroundColor: "#4CAF50",
   },
+  testDbButton: {
+    backgroundColor: "#673AB7",
+  },
+  passwordButton: {
+    backgroundColor: "#9C27B0",
+  },
   logoutButton: {
     backgroundColor: "#f44336",
     marginTop: 30,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
   footer: {
     position: "absolute",

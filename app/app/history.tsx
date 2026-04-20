@@ -1,23 +1,23 @@
-import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useState } from "react";
 import {
-    Alert,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { deleteDetection, getDetections } from "../storage";
+import { useFocusEffect, router } from "expo-router";
+import { deleteDetection, getDetections } from "./storage";
 
 type Detection = {
-  id: string;
+  id: number;
   name: string;
   date: string;
-  scale?: number;
-  angle?: number;
-  points?: number[][];
+  scale?: number | null;
+  angle?: number | null;
+  points?: any[];
   dxfData?: string;
 };
 
@@ -27,13 +27,13 @@ export default function HistoryScreen() {
 
   const loadDetections = async () => {
     const data = await getDetections();
-    setDetections(data);
+    setDetections(data as Detection[]);
   };
 
   useFocusEffect(
     useCallback(() => {
       loadDetections();
-    }, []),
+    }, [])
   );
 
   const onRefresh = async () => {
@@ -46,42 +46,79 @@ export default function HistoryScreen() {
     router.push({
       pathname: "/editor",
       params: {
-        detectionId: item.id,
-        name: item.name,
-        date: item.date,
+        detectionId: String(item.id),
+        dxfData: item.dxfData ?? "",
         scale: String(item.scale ?? 0.25),
         angle: String(item.angle ?? 0),
         points: JSON.stringify(item.points ?? []),
-        dxfData: item.dxfData ?? "",
       },
     });
   };
 
   const handleDelete = (item: Detection) => {
-    Alert.alert("Supprimer", `Voulez-vous supprimer "${item.name}" ?`, [
-      { text: "Annuler", style: "cancel" },
-      {
-        text: "Supprimer",
-        style: "destructive",
-        onPress: async () => {
-          await deleteDetection(item.id);
-          await loadDetections();
+    Alert.alert(
+      "Supprimer",
+      `Voulez-vous supprimer "${item.name}" ?`,
+      [
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            await deleteDetection(item.id);
+            await loadDetections();
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
+
+  const renderItem = ({ item }: { item: Detection }) => (
+    <View style={styles.card}>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{item.name}</Text>
+        <Text style={styles.cardDate}>{item.date}</Text>
+
+        <View style={styles.cardInfoRow}>
+          <Text style={styles.cardInfo}>
+            Échelle: {item.scale ?? 0.25} mm/px
+          </Text>
+          <Text style={styles.cardInfo}>
+            Points: {item.points?.length ?? 0}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.cardButtons}>
+        <TouchableOpacity
+          style={styles.viewButton}
+          onPress={() => handleView(item)}
+        >
+          <Text style={styles.viewButtonText}>Voir</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDelete(item)}
+        >
+          <Text style={styles.deleteButtonText}>×</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   if (detections.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyEmoji}>📁</Text>
+        <Text style={styles.emptyEmoji}>📂</Text>
         <Text style={styles.emptyTitle}>Aucune détection</Text>
-        <Text style={styles.emptyText}>Commencez par scanner une pièce</Text>
+        <Text style={styles.emptyText}>Commencez par scanner une pièce.</Text>
+
         <TouchableOpacity
           style={styles.scanButton}
           onPress={() => router.push("/camera")}
         >
-          <Text style={styles.scanButtonText}>📸 Scanner maintenant</Text>
+          <Text style={styles.scanButtonText}>Scanner maintenant</Text>
         </TouchableOpacity>
       </View>
     );
@@ -91,43 +128,12 @@ export default function HistoryScreen() {
     <View style={styles.container}>
       <FlatList
         data={detections}
-        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.list}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>📸 {item.name}</Text>
-              <Text style={styles.cardDate}>📅 {item.date}</Text>
-              <View style={styles.cardInfoRow}>
-                <Text style={styles.cardInfo}>
-                  📏 Échelle: {item.scale ?? 0.25} mm/px
-                </Text>
-                <Text style={styles.cardInfo}>
-                  📍 {item.points?.length ?? 0} points
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.cardButtons}>
-              <TouchableOpacity
-                style={styles.viewButton}
-                onPress={() => handleView(item)}
-              >
-                <Text style={styles.viewButtonText}>👁️ Voir</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.deleteButton}
-                onPress={() => handleDelete(item)}
-              >
-                <Text style={styles.deleteButtonText}>🗑️</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
       />
     </View>
   );
@@ -171,7 +177,8 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   cardInfoRow: {
-    gap: 4,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   cardInfo: {
     fontSize: 11,
@@ -204,6 +211,7 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
   emptyContainer: {
     flex: 1,
@@ -226,6 +234,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
     marginBottom: 30,
+    textAlign: "center",
   },
   scanButton: {
     backgroundColor: "#FF6600",
